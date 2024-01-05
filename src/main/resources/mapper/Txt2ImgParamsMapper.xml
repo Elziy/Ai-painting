@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsheep.ai.mapper.Txt2ImgParamsMapper">
+    
+    <resultMap id="BaseResultMap" type="com.zsheep.ai.domain.entity.Txt2ImgParams">
+        <id property="pid" column="pid" jdbcType="VARCHAR"/>
+        <result property="enableHr" column="enable_hr" jdbcType="TINYINT"/>
+        <result property="denoisingStrength" column="denoising_strength" jdbcType="DOUBLE"/>
+        <result property="firstphaseWidth" column="firstphase_width" jdbcType="DOUBLE"/>
+        <result property="firstphaseHeight" column="firstphase_height" jdbcType="DOUBLE"/>
+        <result property="hrScale" column="hr_scale" jdbcType="DOUBLE"/>
+        <result property="hrUpscaler" column="hr_upscaler" jdbcType="VARCHAR"/>
+        <result property="hrSecondPassSteps" column="hr_second_pass_steps" jdbcType="INTEGER"/>
+        <result property="hrResizeX" column="hr_resize_x" jdbcType="DOUBLE"/>
+        <result property="hrResizeY" column="hr_resize_y" jdbcType="DOUBLE"/>
+        <result property="prompt" column="prompt" jdbcType="VARCHAR"/>
+        <result property="seed" column="seed" jdbcType="BIGINT"/>
+        <result property="subseed" column="subseed" jdbcType="BIGINT"/>
+        <result property="subseedStrength" column="subseed_strength" jdbcType="BIGINT"/>
+        <result property="seedResizeFromH" column="seed_resize_from_h" jdbcType="BIGINT"/>
+        <result property="seedResizeFromW" column="seed_resize_from_w" jdbcType="BIGINT"/>
+        <result property="samplerName" column="sampler_name" jdbcType="VARCHAR"/>
+        <result property="batchSize" column="batch_size" jdbcType="INTEGER"/>
+        <result property="nIter" column="n_iter" jdbcType="INTEGER"/>
+        <result property="steps" column="steps" jdbcType="INTEGER"/>
+        <result property="cfgScale" column="cfg_scale" jdbcType="DOUBLE"/>
+        <result property="width" column="width" jdbcType="DOUBLE"/>
+        <result property="height" column="height" jdbcType="DOUBLE"/>
+        <result property="restoreFaces" column="restore_faces" jdbcType="TINYINT"/>
+        <result property="tiling" column="tiling" jdbcType="TINYINT"/>
+        <result property="negativePrompt" column="negative_prompt" jdbcType="VARCHAR"/>
+        <result property="eta" column="eta" jdbcType="INTEGER"/>
+        <result property="sChurn" column="s_churn" jdbcType="INTEGER"/>
+        <result property="sTmax" column="s_tmax" jdbcType="INTEGER"/>
+        <result property="sTmin" column="s_tmin" jdbcType="INTEGER"/>
+        <result property="sNoise" column="s_noise" jdbcType="INTEGER"/>
+        <result property="overrideSettingsRestoreAfterwards" column="override_settings_restore_afterwards"
+                jdbcType="TINYINT"/>
+        <result property="samplerIndex" column="sampler_index" jdbcType="VARCHAR"/>
+        <result property="scriptName" column="script_name" jdbcType="VARCHAR"/>
+        <result property="dimensionId" column="dimension_id" jdbcType="INTEGER"/>
+        <result property="info" column="info" jdbcType="VARCHAR"/>
+        <result property="sdModelCheckpoint" column="sd_model_checkpoint" jdbcType="VARCHAR"/>
+        <result property="etaNoiseSeedDelta" column="eta_noise_seed_delta" jdbcType="BIGINT"/>
+        <result property="clipStopAtLastLayers" column="clip_stop_at_last_layers" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+</mapper>

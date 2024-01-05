@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsheep.ai.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.zsheep.ai.domain.entity.User">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="sex" column="sex" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="phone" column="phone" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="loginIp" column="login_ip" jdbcType="VARCHAR"/>
+        <result property="loginTime" column="login_time" jdbcType="TIMESTAMP"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <collection property="roles" javaType="java.util.List" resultMap="Role"/>
+    </resultMap>
+    
+    <resultMap id="Role" type="com.zsheep.ai.domain.entity.Role">
+        <id property="id" column="role_id" jdbcType="BIGINT"/>
+        <result property="name" column="role_name" jdbcType="VARCHAR"/>
+        <result property="roleKey" column="role_key" jdbcType="VARCHAR"/>
+        <result property="status" column="role_status" jdbcType="CHAR"/>
+    </resultMap>
+    
+    <resultMap id="userInfoVo" type="com.zsheep.ai.domain.model.UserInfoVo">
+        <id property="uid" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <sql id="selectUser">
+        select user.id,
+               user.username,
+               user.sex,
+               user.email,
+               user.phone,
+               user.password,
+               user.avatar,
+               user.status,
+               user.del_flag,
+               user.login_ip,
+               user.login_time,
+               user.create_time,
+               role.id     as role_id,
+               role.name   as role_name,
+               role.role_key,
+               role.status as role_status
+        from user
+                 left join user_role ur on user.id = ur.user_id
+                 left join role on ur.role_id = role.id and role.del_flag = 0
+    </sql>
+    
+    <sql id="selectTxt2ImgTaskVo">
+        select t.tid,
+               t.uid,
+               t.create_time,
+               p.pid,
+               p.prompt,
+               p.negative_prompt,
+               p.sampler_index,
+               p.steps,
+               p.cfg_scale,
+               p.dimension_id,
+               p.width,
+               p.height,
+               p.restore_faces,
+               p.tiling,
+               p.seed,
+               p.subseed,
+               p.subseed_strength,
+               p.seed_resize_from_h,
+               p.seed_resize_from_w,
+               p.n_iter,
+               p.enable_hr,
+               p.denoising_strength,
+               p.hr_second_pass_steps,
+               p.hr_scale,
+               p.hr_upscaler,
+               p.sd_model_checkpoint,
+               p.eta_noise_seed_delta,
+               p.CLIP_stop_at_last_layers,
+               i.image_id,
+               i.width  as image_width,
+               i.height as image_height,
+               i.image_url,
+               i.seed   as image_seed,
+               i.is_public,
+               i.create_time
+        from txt_2_img_task t
+                 join txt_2_img_params p on t.pid = p.pid and p.del_flag = 0
+                 join txt_2_img_image i on t.tid = i.tid and i.del_flag = 0 and (i.is_public = 1 or #{self})
+    </sql>
+    
+    <select id="selectUserByEmail" parameterType="String" resultMap="BaseResultMap">
+        <include refid="selectUser"/>
+        where user.email = #{email} and user.del_flag = 0
+    </select>
+    
+    <select id="getUserInfoVoByUid" resultMap="userInfoVo">
+        select user.id,
+               user.username,
+               user.avatar
+        from user
+        where user.id = #{uid}
+          and user.del_flag = 0
+          and user.status = 0
+    </select>
+</mapper>

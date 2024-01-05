@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsheep.ai.mapper.Txt2ImgImageMapper">
+	
+	<resultMap id="BaseResultMap" type="com.zsheep.ai.domain.entity.Txt2ImgImage">
+		<id property="imageId" column="image_id" jdbcType="VARCHAR"/>
+		<result property="width" column="width" jdbcType="DOUBLE"/>
+		<result property="height" column="height" jdbcType="DOUBLE"/>
+		<result property="imageUrl" column="image_url" jdbcType="VARCHAR"/>
+		<result property="seed" column="seed" jdbcType="BIGINT"/>
+		<result property="isPublic" column="is_public" jdbcType="TINYINT"/>
+		<result property="delFlag" column="del_flag" jdbcType="TINYINT"/>
+		<result property="tid" column="tid" jdbcType="VARCHAR"/>
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<resultMap id="Txt2ImgImageVo" type="com.zsheep.ai.domain.model.Txt2ImgImageVo">
+		<id property="imageId" column="image_id" jdbcType="VARCHAR"/>
+		<result property="width" column="image_width" jdbcType="DOUBLE"/>
+		<result property="height" column="image_height" jdbcType="DOUBLE"/>
+		<result property="isPublic" column="is_public" jdbcType="TINYINT"/>
+		<result property="imageUrl" column="image_url" jdbcType="VARCHAR"/>
+		<result property="seed" column="image_seed" jdbcType="BIGINT"/>
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<select id="selectTidByImageId" resultType="string">
+        select tid
+        from txt_2_img_image
+        where image_id = #{imageId}
+          and del_flag = 0
+    </select>
+	
+	
+	<insert id="insertBatch" parameterType="list">
+		insert into txt_2_img_image (image_id, width, height, image_url, is_public, seed, tid, create_time) values
+		<foreach collection="images" item="item" index="index" separator=",">
+			(#{item.imageId}, #{item.width}, #{item.height}, #{item.imageUrl}, #{item.isPublic}, #{item.seed}, #{item.tid},
+			#{item.createTime})
+		</foreach>
+	</insert>
+	
+	<update id="deleteImage">
+		update txt_2_img_image
+		set del_flag = 1
+		where image_id = #{imageId}
+		  and del_flag = 0
+		  and (select uid from txt_2_img_task where tid = txt_2_img_image.tid and del_flag = 0) = #{uid}
+	</update>
+	
+	<update id="setPublic">
+		update txt_2_img_image
+		set is_public = 1
+		where image_id = #{imageId}
+		  and del_flag = 0
+		  and (select uid from txt_2_img_task where tid = txt_2_img_image.tid and del_flag = 0) = #{uid}
+	</update>
+	
+	<update id="setPrivate">
+		update txt_2_img_image
+		set is_public = 0
+		where image_id = #{imageId}
+		  and del_flag = 0
+		  and (select uid from txt_2_img_task where tid = txt_2_img_image.tid and del_flag = 0) = #{uid}
+	</update>
+	
+	<select id="selectImagesByTid" resultMap="Txt2ImgImageVo" resultType="list">
+		select image_id,
+		       width  as image_width,
+		       height as image_height,
+		       image_url,
+		       seed   as image_seed,
+		       is_public,
+		       create_time
+		from txt_2_img_image
+		where del_flag = 0
+		  and tid = #{tid}
+		  and (is_public = 1 or (select uid from txt_2_img_task where tid = #{tid}) = #{uid})
+		order by txt_2_img_image.seed, txt_2_img_image.create_time desc
+	</select>
+	
+	<select id="selectRandomImages" resultType="com.zsheep.ai.domain.model.ImageVo">
+        select i.image_url as imageUrl,
+        u.id as uid,
+        u.username
+        from txt_2_img_image i
+        join txt_2_img_task t on i.tid = t.tid
+        join user u on t.uid = u.id
+        <where>
+            i.del_flag = 0
+            and is_public = 1
+            <if test="wide">
+	            and i.width &gt; i.height
+            </if>
+	        <if test="!wide">
+		        and i.width &lt; i.height
+	        </if>
+        </where>
+        order by rand()
+        limit 1
+    </select>
+</mapper>

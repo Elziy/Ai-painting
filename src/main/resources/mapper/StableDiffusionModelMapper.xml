@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsheep.ai.mapper.StableDiffusionModelMapper">
+    
+    <resultMap id="BaseResultMap" type="com.zsheep.ai.domain.entity.StableDiffusionModel">
+        <id property="hash" column="hash" jdbcType="VARCHAR"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="modelName" column="model_name" jdbcType="VARCHAR"/>
+        <result property="modelImage" column="model_image" jdbcType="VARCHAR"/>
+        <result property="filename" column="filename" jdbcType="VARCHAR"/>
+        <result property="sha256" column="sha256" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="delflag" column="delFlag" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <resultMap id="StableDiffusionModelVo" type="com.zsheep.ai.domain.model.StableDiffusionModelVo">
+        <id property="hash" column="hash" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="modelName" column="model_name" jdbcType="VARCHAR"/>
+        <result property="modelImage" column="model_image" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <select id="getAllModels" resultType="list" resultMap="StableDiffusionModelVo">
+        SELECT hash,
+               description,
+               model_name,
+               model_image
+        FROM stable_diffusion_model
+        WHERE delFlag = 0
+          and status = 1
+        order by create_time
+    </select>
+</mapper>

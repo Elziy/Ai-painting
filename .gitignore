@@ -1,0 +1,14 @@
+## ide
+**/.idea
+*.iml
+rebel.xml
+/.fastRequest/
+
+## backend
+**/target
+**/logs
+
+## front
+**/*.lock
+/uploads
+/src/main/resources/application.yaml

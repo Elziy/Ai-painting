@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsheep.ai.mapper.Txt2ImgTaskMapper">
+    
+    <resultMap id="BaseResultMap" type="com.zsheep.ai.domain.entity.Txt2ImgTask">
+        <id property="tid" column="tid" jdbcType="VARCHAR"/>
+        <result property="uid" column="uid" jdbcType="BIGINT"/>
+        <result property="pid" column="pid" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+    </resultMap>
+    
+    <resultMap id="UserWork" type="com.zsheep.ai.domain.model.UserWorkVo">
+        <id property="tid" column="tid" jdbcType="VARCHAR"/>
+        <result property="uid" column="uid" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="isLike" column="is_like" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <association property="parameters" resultMap="Txt2ImgParamsVo"/>
+        <collection property="images" column="tid" javaType="java.util.List" resultMap="Txt2ImgImageVo"/>
+    </resultMap>
+    
+    <resultMap id="Txt2ImgTaskVo" type="com.zsheep.ai.domain.model.Txt2ImgTaskVo">
+        <id property="tid" column="tid" jdbcType="VARCHAR"/>
+        <result property="uid" column="uid" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time"/>
+        <association property="parameters" resultMap="Txt2ImgParamsVo"/>
+        <collection property="images" column="tid" javaType="java.util.List" resultMap="Txt2ImgImageVo"/>
+    </resultMap>
+    
+    <resultMap id="Txt2ImgParamsVo" type="com.zsheep.ai.domain.model.Txt2ImgParamsVo">
+        <result property="pid" column="pid" jdbcType="BIGINT"/>
+        <result property="enableHr" column="enable_hr" jdbcType="TINYINT"/>
+        <result property="denoisingStrength" column="denoising_strength" jdbcType="DOUBLE"/>
+        <result property="hrScale" column="hr_scale" jdbcType="DOUBLE"/>
+        <result property="hrUpscaler" column="hr_upscaler" jdbcType="VARCHAR"/>
+        <result property="hrSecondPassSteps" column="hr_second_pass_steps" jdbcType="INTEGER"/>
+        <result property="prompt" column="prompt" jdbcType="VARCHAR"/>
+        <result property="seed" column="seed" jdbcType="BIGINT"/>
+        <result property="subseed" column="subseed" jdbcType="BIGINT"/>
+        <result property="subseedStrength" column="subseed_strength" jdbcType="BIGINT"/>
+        <result property="seedResizeFromH" column="seed_resize_from_h" jdbcType="BIGINT"/>
+        <result property="seedResizeFromW" column="seed_resize_from_w" jdbcType="BIGINT"/>
+        <result property="nIter" column="n_iter" jdbcType="INTEGER"/>
+        <result property="steps" column="steps" jdbcType="INTEGER"/>
+        <result property="cfgScale" column="cfg_scale" jdbcType="DOUBLE"/>
+        <result property="width" column="width" jdbcType="DOUBLE"/>
+        <result property="height" column="height" jdbcType="DOUBLE"/>
+        <result property="restoreFaces" column="restore_faces" jdbcType="TINYINT"/>
+        <result property="tiling" column="tiling" jdbcType="TINYINT"/>
+        <result property="negativePrompt" column="negative_prompt" jdbcType="VARCHAR"/>
+        <result property="overrideSettingsRestoreAfterwards" column="override_settings_restore_afterwards"
+                jdbcType="TINYINT"/>
+        <result property="samplerIndex" column="sampler_index" jdbcType="VARCHAR"/>
+        <result property="dimensionId" column="dimension_id" jdbcType="INTEGER"/>
+        <result property="model" column="sd_model_checkpoint" jdbcType="VARCHAR"/>
+        <association property="overrideSettings" javaType="com.zsheep.ai.domain.model.api.OverrideSettings">
+            <result property="etaNoiseSeedDelta" column="eta_noise_seed_delta" jdbcType="BIGINT"/>
+            <result property="clipStopAtLastLayers" column="CLIP_stop_at_last_layers" jdbcType="BIGINT"/>
+        </association>
+    </resultMap>
+    
+    <resultMap id="Txt2ImgImageVo" type="com.zsheep.ai.domain.model.Txt2ImgImageVo">
+        <id property="imageId" column="image_id" jdbcType="VARCHAR"/>
+        <result property="width" column="image_width" jdbcType="DOUBLE"/>
+        <result property="height" column="image_height" jdbcType="DOUBLE"/>
+        <result property="isPublic" column="is_public" jdbcType="TINYINT"/>
+        <result property="imageUrl" column="image_url" jdbcType="VARCHAR"/>
+        <result property="seed" column="image_seed" jdbcType="BIGINT"/>
+        <result property="createTime" column="image_create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <select id="selectTxt2ImgTaskVoByUid" resultType="list" resultMap="Txt2ImgTaskVo">
+        select t.tid,
+        t.uid,
+        t.create_time,
+        p.pid,
+        p.prompt,
+        p.negative_prompt,
+        p.sampler_index,
+        p.steps,
+        p.cfg_scale,
+        p.dimension_id,
+        p.width,
+        p.height,
+        p.restore_faces,
+        p.tiling,
+        p.seed,
+        p.subseed,
+        p.subseed_strength,
+        p.seed_resize_from_h,
+        p.seed_resize_from_w,
+        p.n_iter,
+        p.enable_hr,
+        p.denoising_strength,
+        p.hr_second_pass_steps,
+        p.hr_scale,
+        p.hr_upscaler,
+        p.sd_model_checkpoint,
+        p.eta_noise_seed_delta,
+        p.CLIP_stop_at_last_layers,
+        i.image_id,
+        i.width as image_width,
+        i.height as image_height,
+        i.image_url,
+        i.seed as image_seed,
+        i.is_public,
+        i.create_time as image_create_time
+        from txt_2_img_task t
+        join txt_2_img_params p on t.pid = p.pid and p.del_flag = 0
+        join txt_2_img_image i on t.tid = i.tid and i.del_flag = 0 and (i.is_public = 1 or #{self})
+        <where>
+            t.uid = #{uid} and t.del_flag = 0
+            <if test="params.startTime != null">
+                and t.create_time &gt; #{params.startTime}
+            </if>
+        </where>
+        order by t.create_time desc, i.seed, i.create_time desc
+    </select>
+    
+    <sql id="selectRecommendImages">
+        select t.tid,
+               t.uid,
+               t.create_time,
+               p.pid,
+               p.prompt,
+               p.negative_prompt,
+               p.sampler_index,
+               p.steps,
+               p.cfg_scale,
+               p.dimension_id,
+               p.width,
+               p.height,
+               p.restore_faces,
+               p.tiling,
+               p.seed,
+               p.subseed,
+               p.subseed_strength,
+               p.seed_resize_from_h,
+               p.seed_resize_from_w,
+               p.n_iter,
+               p.enable_hr,
+               p.denoising_strength,
+               p.hr_second_pass_steps,
+               p.hr_scale,
+               p.hr_upscaler,
+               p.sd_model_checkpoint,
+               p.eta_noise_seed_delta,
+               p.CLIP_stop_at_last_layers,
+               u.username,
+               u.avatar,
+               IF(ul.uid is null, 0, 1) as is_like
+        from txt_2_img_task t
+                 left join txt_2_img_params p on t.pid = p.pid and p.del_flag = 0
+                 join user u on t.uid = u.id and u.del_flag = 0 and u.status = 0
+                 left join user_like ul on t.tid = ul.tid and ul.uid = #{uid}
+    </sql>
+    
+    <select id="selectRecommendImages" resultMap="UserWork">
+        select t.tid,
+        t.uid,
+        t.create_time,
+        u.username,
+        u.avatar,
+        IF(ul.uid is null, 0, 1) as is_like
+        from txt_2_img_task t
+        join user u on t.uid = u.id and u.del_flag = 0 and u.status = 0
+        left join user_like ul on t.tid = ul.tid and ul.uid = #{uid}
+        <where>
+            t.del_flag = 0
+            and (select count(i.tid)
+            from txt_2_img_image i
+            where i.tid = t.tid
+            and i.del_flag = 0
+            and (i.is_public = 1 or t.uid = #{uid})) > 0
+        </where>
+        <if test="params.orderBy != null">
+            order by ${params.orderBy}
+        </if>
+        <if test="params.limit != null">
+            limit ${params.limit}
+        </if>
+    </select>
+    
+    <select id="selectUserWorkByTid" resultMap="UserWork">
+        select t.tid,
+               t.uid,
+               t.create_time,
+               p.pid,
+               p.prompt,
+               p.negative_prompt,
+               p.sampler_index,
+               p.steps,
+               p.cfg_scale,
+               p.dimension_id,
+               p.width,
+               p.height,
+               p.restore_faces,
+               p.tiling,
+               p.seed,
+               p.subseed,
+               p.subseed_strength,
+               p.seed_resize_from_h,
+               p.seed_resize_from_w,
+               p.n_iter,
+               p.enable_hr,
+               p.denoising_strength,
+               p.hr_second_pass_steps,
+               p.hr_scale,
+               p.hr_upscaler,
+               p.sd_model_checkpoint,
+               p.eta_noise_seed_delta,
+               p.CLIP_stop_at_last_layers,
+               u.username,
+               u.avatar,
+               i.image_id,
+               i.width                  as image_width,
+               i.height                 as image_height,
+               i.image_url,
+               i.seed                   as image_seed,
+               i.is_public,
+               i.create_time            as image_create_time,
+               IF(ul.uid is null, 0, 1) as is_like
+        from txt_2_img_task t
+                 left join txt_2_img_params p on t.pid = p.pid and p.del_flag = 0
+                 join user u on t.uid = u.id and u.del_flag = 0 and u.status = 0
+                 left join user_like ul on t.tid = ul.tid and ul.uid = #{uid}
+                 join txt_2_img_image i on t.tid = i.tid and i.del_flag = 0 and (i.is_public = 1 or t.uid = #{uid})
+        where t.tid = #{tid}
+          and t.del_flag = 0
+          and (select count(i.tid)
+               from txt_2_img_image i
+               where i.tid = t.tid
+                 and i.del_flag = 0
+                 and (i.is_public = 1 or t.uid = #{uid})) > 0
+        order by i.seed, i.create_time desc
+    </select>
+    
+    <select id="selectUserWorks" resultMap="UserWork">
+        select t.tid,
+               t.uid,
+               t.create_time,
+               IF(ul.uid is null, 0, 1) as is_like
+        from txt_2_img_task t
+                 left join user_like ul on t.tid = ul.tid and ul.uid = #{loginUid}
+        where t.uid = #{uid}
+          and t.del_flag = 0
+          and (select count(i.tid)
+               from txt_2_img_image i
+               where i.tid = t.tid
+                 and i.del_flag = 0
+                 and (i.is_public = 1 or ${uid} = ${loginUid})) > 0
+        order by t.create_time desc
+    </select>
+    
+    <select id="selectUserLikes" resultMap="UserWork">
+        select t.tid,
+               t.uid,
+               t.create_time,
+               u.username,
+               u.avatar
+        from user_like ul
+                 join txt_2_img_task t on ul.tid = t.tid and t.del_flag = 0 and (select count(i.tid)
+                                                                                 from txt_2_img_image i
+                                                                                 where i.tid = t.tid
+                                                                                   and i.del_flag = 0
+                                                                                   and (i.is_public = 1 or #{self})) >
+                                                                                0
+                 join user u on t.uid = u.id and u.del_flag = 0 and u.status = 0
+            and ul.uid = #{uid}
+        order by ul.create_time desc
+    </select>
+    
+    <!--	UPDATE txt_2_img_task AS t
+    SET del_flag = 1
+    WHERE ((SELECT
+            count( i.tid )
+        FROM
+            txt_2_img_image AS i
+    WHERE
+        i.tid = t.tid AND i.del_flag = 0) = 0)-->
+    
+    <!--	UPDATE txt_2_img_params AS p
+    SET del_flag = 1
+    WHERE p.pid in (SELECT pid FROM txt_2_img_task AS t WHERE t.del_flag = 1)-->
+</mapper>
