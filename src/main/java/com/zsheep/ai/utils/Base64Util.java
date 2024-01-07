@@ -4,6 +4,7 @@ import org.apache.tomcat.util.codec.binary.Base64;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Base64Util {
@@ -13,7 +14,7 @@ public class Base64Util {
      * @param base64Str   base64 str
      * @param imgFilePath img文件路径
      */
-    public static void GenerateImage(String base64Str, String imgFilePath) {
+    public static void generateImage(String base64Str, String imgFilePath) {
         if (base64Str == null) // 图像数据为空
             return;
         base64Str = getBase64(base64Str);
@@ -25,8 +26,13 @@ public class Base64Util {
                     bytes[i] += 256;
                 }
             }
+            // 目录不存在，则创建
+            Path path = Paths.get(imgFilePath);
+            if (!Files.exists(path.getParent())) {
+                Files.createDirectories(path.getParent());
+            }
             // 生成图片
-            OutputStream out = Files.newOutputStream(Paths.get(imgFilePath));
+            OutputStream out = Files.newOutputStream(path);
             out.write(bytes);
             out.flush();
             out.close();

@@ -51,7 +51,7 @@ public class FileService {
                 String fileName = format + "-" + image.getImageId() + "." + apiProperties.getFileType();
                 String imgFilePath = apiProperties.getFilePath() + "/" + fileName;
                 try {
-                    Base64Util.GenerateImage(image.getImageUrl(), imgFilePath);
+                    Base64Util.generateImage(image.getImageUrl(), imgFilePath);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }
