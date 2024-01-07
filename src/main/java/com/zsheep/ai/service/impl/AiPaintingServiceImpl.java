@@ -431,7 +431,7 @@ public class AiPaintingServiceImpl implements AiPaintingService {
     private void saveTask(String taskId, Long uid, List<Txt2ImgImageVo> txt2ImgImageVoBase64List, Txt2ImgParams parameters) {
         // 保存图片文件/OSS
         CompletableFuture<List<Txt2ImgImage>> saveImageFiles = CompletableFuture.supplyAsync(() ->
-                fileService.saveImages(txt2ImgImageVoBase64List, taskId), threadPoolExecutor);
+                fileService.saveImagesToImagesServer(txt2ImgImageVoBase64List, taskId), threadPoolExecutor);
         
         saveImageFiles.whenComplete((txt2ImgImages, throwable) -> {
             if (Objects.nonNull(throwable)) {
