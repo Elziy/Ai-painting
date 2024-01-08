@@ -197,37 +197,42 @@ public class AiPaintingServiceImpl implements AiPaintingService {
         
         MyFutureTask<Void> currentTask = taskExecutor.getCurrentTask();
         if (Objects.nonNull(currentTask) && currentTask.getTaskId().equals(taskId)) {
-            ApiTaskProgress apiTaskProgress = aiApiService.getTaskProgressByApi();
-            taskProgressVo = new TaskProgressVo();
-            taskProgressVo.setTaskId(taskId);
-            taskProgressVo.setProgress(apiTaskProgress.getProgress());
-            taskProgressVo.setEta(apiTaskProgress.getEtaRelative());
-            taskProgressVo.setActive(true);
-            String job = apiTaskProgress.getState().getJob();
-            // if (StrUtil.isBlank(job)) {
-            //     // 1张
-            //     if (apiTaskProgress.getState().getJobCount() == 1) {
-            //         taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount());
-            //         taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo());
-            //     } else {
-            //         taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount() / 2);
-            //         taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo() / 2);
-            //     }
-            // } else {
-            //     try {
-            //         // Batch 1 out of 2
-            //         String[] split = job.split(" ");
-            //         System.out.println("split = " + Arrays.toString(split));
-            //         taskProgressVo.setJobCount(Integer.parseInt(split[4]));
-            //         taskProgressVo.setJobNo(Integer.parseInt(split[1]) - 1);
-            //     } catch (NumberFormatException e) {
-            //         taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount());
-            //         taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo());
-            //     }
-            // }
-            taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount());
-            taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo());
-            return taskProgressVo;
+            ApiTaskProgress apiTaskProgress;
+            try {
+                apiTaskProgress = aiApiService.getTaskProgressByApi();
+                taskProgressVo = new TaskProgressVo();
+                taskProgressVo.setTaskId(taskId);
+                taskProgressVo.setProgress(apiTaskProgress.getProgress());
+                taskProgressVo.setEta(apiTaskProgress.getEtaRelative());
+                taskProgressVo.setActive(true);
+                String job = apiTaskProgress.getState().getJob();
+                // if (StrUtil.isBlank(job)) {
+                //     // 1张
+                //     if (apiTaskProgress.getState().getJobCount() == 1) {
+                //         taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount());
+                //         taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo());
+                //     } else {
+                //         taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount() / 2);
+                //         taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo() / 2);
+                //     }
+                // } else {
+                //     try {
+                //         // Batch 1 out of 2
+                //         String[] split = job.split(" ");
+                //         System.out.println("split = " + Arrays.toString(split));
+                //         taskProgressVo.setJobCount(Integer.parseInt(split[4]));
+                //         taskProgressVo.setJobNo(Integer.parseInt(split[1]) - 1);
+                //     } catch (NumberFormatException e) {
+                //         taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount());
+                //         taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo());
+                //     }
+                // }
+                taskProgressVo.setJobCount(apiTaskProgress.getState().getJobCount());
+                taskProgressVo.setJobNo(apiTaskProgress.getState().getJobNo());
+                return taskProgressVo;
+            } catch (Exception e) {
+                throw new TaskException("task.generate.image.is.error", null);
+            }
         }
         
         int taskIndex = taskExecutor.getTaskQueueIndex(taskId);
