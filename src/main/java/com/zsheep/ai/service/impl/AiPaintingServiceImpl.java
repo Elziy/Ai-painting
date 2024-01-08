@@ -87,53 +87,13 @@ public class AiPaintingServiceImpl implements AiPaintingService {
     }
     
     @Override
-    public Txt2ImgTaskVo txt2img(String taskId, Txt2ImgParamsVo params) {
-        Long uid = SecurityUtils.getUserId();
-        checkTaskId(taskId, uid);
-        initParams(params);
-        Future<?> submit = taskExecutor.submit(() -> aiApiService.getImageByApi(params), taskId, uid);
-        ApiImgageResponse apiImgageResponse;
-        try {
-            Object o = submit.get();
-            apiImgageResponse = (ApiImgageResponse) o;
-            apiImgageResponse.getParameters().setPid(taskId);
-            apiImgageResponse.getParameters().setDimensionId(params.getDimension().getId());
-            apiImgageResponse.getParameters().setInfo(apiImgageResponse.getInfo());
-        } catch (CancellationException e) {
-            log.error("任务{}被取消", taskId);
-            taskFailed(taskId, MessageUtils.message("task.is.cancel"));
-            throw new TaskCancelException();
-        } catch (InterruptedException e) {
-            log.error("任务{}被中断", taskId);
-            taskFailed(taskId, MessageUtils.message("task.is.interrupt"));
-            throw new TaskException("task.is.interrupt", null);
-        } catch (Exception e) {
-            log.error("获取任务{}执行结果异常,原因:{}", taskId, e.getMessage());
-            taskFailed(taskId, MessageUtils.message("task.generate.image.is.error"));
-            throw new TaskCancelException();
-        }
-        
-        List<String> imageBase64List = apiImgageResponse.getImages();
-        if (Objects.isNull(imageBase64List) || imageBase64List.isEmpty()) {
-            throw new TaskException("task.generate.image.is.error", null);
-        }
-        List<Txt2ImgImageVo> txt2ImgImageVoBase64List = getTxt2ImgImageVos(params, imageBase64List);
-        Txt2ImgTaskVo txt2ImgTaskVo = getTxt2ImgTaskVo(taskId, params, uid, txt2ImgImageVoBase64List);
-        taskSuccess(taskId, txt2ImgTaskVo);
-        // 保存完成任务信息
-        Txt2ImgParams parameters = apiImgageResponse.getParameters();
-        saveTask(taskId, uid, txt2ImgImageVoBase64List, parameters);
-        return txt2ImgTaskVo;
-    }
-    
-    @Override
     public String txt2imgAsync(Txt2ImgParamsVo params) {
         Long uid = SecurityUtils.getUserId();
         
         String taskId = initTaskId(uid);
         initParams(params);
         
-        Future<?> submit = taskExecutor.submit(() -> {
+        taskExecutor.submit(() -> {
             ApiImgageResponse apiImgageResponse = aiApiService.getImageByApi(params);
             Txt2ImgParams parameters = apiImgageResponse.getParameters();
             parameters.setPid(taskId);
@@ -155,27 +115,27 @@ public class AiPaintingServiceImpl implements AiPaintingService {
             saveTask(taskId, uid, txt2ImgImageVoBase64List, parameters);
         }, taskId, uid);
         
-        new Thread(() -> {
-            try {
-                submit.get();
-            } catch (CancellationException e) {
-                log.error("任务{}被取消", taskId);
-            } catch (InterruptedException e) {
-                log.error("任务{}被中断", taskId);
-                TaskProgressVo taskProgressVo = new TaskProgressVo();
-                taskProgressVo.setTaskId(taskId);
-                taskProgressVo.setFailed(true);
-                taskProgressVo.setFailureCause(MessageUtils.message("task.is.interrupt"));
-                finishTaskMap.put(taskId, taskProgressVo);
-            } catch (Exception e) {
-                log.error("获取任务{}执行结果异常,原因:{}", taskId, e.getMessage());
-                TaskProgressVo taskProgressVo = new TaskProgressVo();
-                taskProgressVo.setTaskId(taskId);
-                taskProgressVo.setFailed(true);
-                taskProgressVo.setFailureCause(MessageUtils.message("task.generate.image.is.error"));
-                finishTaskMap.put(taskId, taskProgressVo);
-            }
-        }).start();
+        // new Thread(() -> {
+        //     try {
+        //         submit.get();
+        //     } catch (CancellationException e) {
+        //         log.error("任务{}被取消", taskId);
+        //     } catch (InterruptedException e) {
+        //         log.error("任务{}被中断", taskId);
+        //         TaskProgressVo taskProgressVo = new TaskProgressVo();
+        //         taskProgressVo.setTaskId(taskId);
+        //         taskProgressVo.setFailed(true);
+        //         taskProgressVo.setFailureCause(MessageUtils.message("task.is.interrupt"));
+        //         finishTaskMap.put(taskId, taskProgressVo);
+        //     } catch (Exception e) {
+        //         log.error("获取任务{}执行结果异常,原因:{}", taskId, e.getMessage());
+        //         TaskProgressVo taskProgressVo = new TaskProgressVo();
+        //         taskProgressVo.setTaskId(taskId);
+        //         taskProgressVo.setFailed(true);
+        //         taskProgressVo.setFailureCause(MessageUtils.message("task.generate.image.is.error"));
+        //         finishTaskMap.put(taskId, taskProgressVo);
+        //     }
+        // }).start();
         
         return taskId;
     }

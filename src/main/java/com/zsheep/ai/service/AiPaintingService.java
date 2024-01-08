@@ -15,17 +15,6 @@ public interface AiPaintingService {
     Boolean cancelTask(String taskId);
     
     /**
-     * 文字转图片(等待结果)
-     *
-     * @param taskId 任务ID
-     * @param params 参数
-     * @return {@link Txt2ImgTaskVo}
-     * @throws TaskException       任务异常
-     * @throws TaskCancelException 任务取消异常, 任务被成功取消
-     */
-    Txt2ImgTaskVo txt2img(String taskId, Txt2ImgParamsVo params);
-    
-    /**
      * 文字转图片(不等待结果)
      *
      * @param taskId 任务ID
