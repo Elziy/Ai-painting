@@ -11,4 +11,6 @@ public class ApiConstant {
     public static final String GET_TAGS = "/tagger/v1/interrogate";
     
     public static final String GET_STABLE_DIFFUSION_MODELS = "/sdapi/v1/sd-models";
+    
+    public static final String CONTROLNET_PREPROCESS = "/controlnet/preprocess";
 }

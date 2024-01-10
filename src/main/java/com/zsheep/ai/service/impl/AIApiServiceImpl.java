@@ -7,8 +7,10 @@ import com.zsheep.ai.common.constants.HttpStatus;
 import com.zsheep.ai.common.exception.service.ServiceException;
 import com.zsheep.ai.config.api.ApiProperties;
 import com.zsheep.ai.domain.entity.StableDiffusionModel;
+import com.zsheep.ai.domain.model.ControlNetPreprocessParamsVo;
 import com.zsheep.ai.domain.model.TaggerParamsVo;
 import com.zsheep.ai.domain.model.Txt2ImgParamsVo;
+import com.zsheep.ai.domain.model.api.ApiControlNetPreprocessResponse;
 import com.zsheep.ai.domain.model.api.ApiImgageResponse;
 import com.zsheep.ai.domain.model.api.ApiTaggerResponse;
 import com.zsheep.ai.domain.model.api.ApiTaskProgress;
@@ -132,6 +134,32 @@ public class AIApiServiceImpl implements AIApiService {
             } catch (IOException ignored) {
             }
             throw new ServiceException("调用查询模型api异常");
+        }
+    }
+    
+    @Override
+    public ApiControlNetPreprocessResponse getControlNetPreprocessByApi(ControlNetPreprocessParamsVo params) {
+        HttpResponse response;
+        try {
+            Map<String, String> querys = new HashMap<>();
+            String bodys = JSON.toJSONString(params);
+            response = HttpUtil.doPost(apiProperties.getHost(), ApiConstant.CONTROLNET_PREPROCESS, HttpMethods.POST, getHeaders(), querys, bodys);
+        } catch (Exception e) {
+            throw new ServiceException("调用控制网络预处理api异常");
+        }
+        if (Objects.nonNull(response) && response.getStatusLine().getStatusCode() == HttpStatus.SUCCESS) {
+            try {
+                String json = EntityUtils.toString(response.getEntity());
+                return JSON.parseObject(json, ApiControlNetPreprocessResponse.class);
+            } catch (IOException e) {
+                throw new ServiceException("解析控制网络预处理api返回结果异常");
+            }
+        } else {
+            try {
+                log.error("调用控制网络预处理api异常{}", EntityUtils.toString(response.getEntity()));
+            } catch (IOException ignored) {
+            }
+            throw new ServiceException("参数异常");
         }
     }
     
