@@ -20,4 +20,9 @@ public class ControlNetServiceImpl implements ControlNetService {
         preprocess.setImage("data:image/jpeg;base64," + preprocess.getImage());
         return preprocess;
     }
+    
+    @Override
+    public String getControlNetType() {
+        return aiApiService.getControlNetTypeByApi();
+    }
 }

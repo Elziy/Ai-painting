@@ -5,6 +5,7 @@ import com.zsheep.ai.domain.model.ControlNetPreprocessParamsVo;
 import com.zsheep.ai.service.ControlNetService;
 import com.zsheep.ai.utils.MessageUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,15 @@ public class ControlNetController {
     public R<?> preprocess(@Validated @RequestBody ControlNetPreprocessParamsVo params) {
         try {
             return R.ok(controlNetService.getControlNetPreprocess(params));
+        } catch (Exception e) {
+            return R.error(MessageUtils.message("controlnet.is.error"));
+        }
+    }
+    
+    @GetMapping("/controlnet/type")
+    public R<?> type() {
+        try {
+            return R.ok(controlNetService.getControlNetType(), null);
         } catch (Exception e) {
             return R.error(MessageUtils.message("controlnet.is.error"));
         }

@@ -21,4 +21,6 @@ public interface AIApiService {
     List<StableDiffusionModel> getStableDiffusionModelsByApi();
     
     ApiControlNetPreprocessResponse getControlNetPreprocessByApi(ControlNetPreprocessParamsVo params);
+    
+    String getControlNetTypeByApi();
 }

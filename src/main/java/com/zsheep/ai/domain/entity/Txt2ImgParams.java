@@ -114,6 +114,8 @@ public class Txt2ImgParams implements Serializable {
      */
     private Long clipStopAtLastLayers;
     
+    private String controlNetArgs;
+    
     /**
      * 创作信息
      */

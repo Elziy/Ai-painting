@@ -9,6 +9,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -147,6 +148,8 @@ public class Txt2ImgParamsVo {
     
     private String model;
     
+    private ControlNet controlNet;
+    
     @SuppressWarnings("unused")
     public void setDimensionId(int dimensionId) {
         this.dimensionId = dimensionId;
@@ -155,6 +158,39 @@ public class Txt2ImgParamsVo {
             this.dimension = d;
         } else {
             this.dimension = new Dimension(dimensionId, width, height, width + " × " + height);
+        }
+    }
+    
+    @Data
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    public static class ControlNet {
+        List<ControlNetArgs> args;
+    }
+    
+    @Data
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    public static class ControlNetArgs {
+        private Boolean enabled = true;
+        private String module;
+        private String moduleOriginal;
+        private String model;
+        private Double weight = 1.0;
+        private String image;
+        private String inputImage;
+        private Integer resizeMode;
+        private Boolean lowvram = false;
+        private Integer processorRes = 512;
+        private Integer thresholdA = -1;
+        private Integer thresholdB = -1;
+        private Double guidanceStart = 0.0;
+        private Double guidanceEnd = 1.0;
+        private Integer controlMode = 0;
+        private Boolean pixelPerfect = false;
+        
+        @SuppressWarnings("unused")
+        public void setModule(String module) {
+            this.moduleOriginal = module;
+            this.module = "none";
         }
     }
 }

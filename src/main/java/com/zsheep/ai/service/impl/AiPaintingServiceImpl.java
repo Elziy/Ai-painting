@@ -1,6 +1,7 @@
 package com.zsheep.ai.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.zsheep.ai.common.constants.CommonConstant;
 import com.zsheep.ai.common.constants.enums.DecimalPlaces;
@@ -9,7 +10,6 @@ import com.zsheep.ai.common.core.domain.model.TaskMap;
 import com.zsheep.ai.common.core.service.FileService;
 import com.zsheep.ai.common.core.task.TaskExecutor;
 import com.zsheep.ai.common.exception.service.ServiceException;
-import com.zsheep.ai.common.exception.task.TaskCancelException;
 import com.zsheep.ai.common.exception.task.TaskException;
 import com.zsheep.ai.config.api.ApiProperties;
 import com.zsheep.ai.config.thread.MyFutureTask;
@@ -26,7 +26,6 @@ import com.zsheep.ai.service.AiPaintingService;
 import com.zsheep.ai.service.StableDiffusionModelService;
 import com.zsheep.ai.service.Txt2ImgTaskService;
 import com.zsheep.ai.utils.DateUtils;
-import com.zsheep.ai.utils.MessageUtils;
 import com.zsheep.ai.utils.SecurityUtils;
 import com.zsheep.ai.utils.uuid.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +35,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -98,6 +95,9 @@ public class AiPaintingServiceImpl implements AiPaintingService {
             Txt2ImgParams parameters = apiImgageResponse.getParameters();
             parameters.setPid(taskId);
             parameters.setDimensionId(params.getDimension().getId());
+            Txt2ImgParamsVo.ControlNet controlnet = (Txt2ImgParamsVo.ControlNet) params.getAlwaysonScripts().get("controlnet");
+            List<Txt2ImgParamsVo.ControlNetArgs> args = controlnet.getArgs();
+            parameters.setControlNetArgs(JSON.toJSONString(args));
             parameters.setInfo(apiImgageResponse.getInfo());
             parameters.setSdModelCheckpoint(parameters.getOverrideSettings().getSdModelCheckpoint());
             parameters.setClipStopAtLastLayers(parameters.getOverrideSettings().getClipStopAtLastLayers());
@@ -308,6 +308,10 @@ public class AiPaintingServiceImpl implements AiPaintingService {
                 }
             }
         }
+        
+        Map<String, Object> alwaysonScripts = params.getAlwaysonScripts();
+        alwaysonScripts.put("controlnet", params.getControlNet());
+        params.setControlNet(null);
     }
     
     /**

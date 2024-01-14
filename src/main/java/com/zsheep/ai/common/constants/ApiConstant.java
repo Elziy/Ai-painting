@@ -13,4 +13,6 @@ public class ApiConstant {
     public static final String GET_STABLE_DIFFUSION_MODELS = "/sdapi/v1/sd-models";
     
     public static final String CONTROLNET_PREPROCESS = "/controlnet/preprocess";
+    
+    public static final String CONTROLNET_TYPE = "/controlnet/control_types";
 }

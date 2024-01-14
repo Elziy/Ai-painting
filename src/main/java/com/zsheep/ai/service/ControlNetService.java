@@ -5,4 +5,6 @@ import com.zsheep.ai.domain.model.api.ApiControlNetPreprocessResponse;
 
 public interface ControlNetService {
     ApiControlNetPreprocessResponse getControlNetPreprocess(ControlNetPreprocessParamsVo params);
+    
+    String getControlNetType();
 }
