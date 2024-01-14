@@ -150,6 +150,8 @@ public class Txt2ImgParamsVo {
     
     private ControlNet controlNet;
     
+    private String controlNetArgs;
+    
     @SuppressWarnings("unused")
     public void setDimensionId(int dimensionId) {
         this.dimensionId = dimensionId;
@@ -187,7 +189,6 @@ public class Txt2ImgParamsVo {
         private Integer controlMode = 0;
         private Boolean pixelPerfect = false;
         
-        @SuppressWarnings("unused")
         public void setModule(String module) {
             this.moduleOriginal = module;
             this.module = "none";

@@ -26,6 +26,7 @@ import com.zsheep.ai.service.AiPaintingService;
 import com.zsheep.ai.service.StableDiffusionModelService;
 import com.zsheep.ai.service.Txt2ImgTaskService;
 import com.zsheep.ai.utils.DateUtils;
+import com.zsheep.ai.utils.MessageUtils;
 import com.zsheep.ai.utils.SecurityUtils;
 import com.zsheep.ai.utils.uuid.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,9 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -89,15 +92,22 @@ public class AiPaintingServiceImpl implements AiPaintingService {
         
         String taskId = initTaskId(uid);
         initParams(params);
+        Txt2ImgParamsVo.ControlNet controlnet = (Txt2ImgParamsVo.ControlNet) params.getAlwaysonScripts().get("controlnet");
+        List<Txt2ImgParamsVo.ControlNetArgs> args = controlnet.getArgs();
         
-        taskExecutor.submit(() -> {
+        Future<Void> submit = taskExecutor.submit(() -> {
+            List<ControlNetArgs> controlNetArgs = new ArrayList<>(args.size());
+            List<String> inputImageList = new ArrayList<>(args.size());
+            for (Txt2ImgParamsVo.ControlNetArgs arg : args) {
+                ControlNetArgs controlNetArg = getControlNetArgs(arg);
+                controlNetArgs.add(controlNetArg);
+                inputImageList.add(arg.getInputImage());
+                arg.setInputImage(null);
+            }
             ApiImgageResponse apiImgageResponse = aiApiService.getImageByApi(params);
             Txt2ImgParams parameters = apiImgageResponse.getParameters();
             parameters.setPid(taskId);
             parameters.setDimensionId(params.getDimension().getId());
-            Txt2ImgParamsVo.ControlNet controlnet = (Txt2ImgParamsVo.ControlNet) params.getAlwaysonScripts().get("controlnet");
-            List<Txt2ImgParamsVo.ControlNetArgs> args = controlnet.getArgs();
-            parameters.setControlNetArgs(JSON.toJSONString(args));
             parameters.setInfo(apiImgageResponse.getInfo());
             parameters.setSdModelCheckpoint(parameters.getOverrideSettings().getSdModelCheckpoint());
             parameters.setClipStopAtLastLayers(parameters.getOverrideSettings().getClipStopAtLastLayers());
@@ -107,38 +117,53 @@ public class AiPaintingServiceImpl implements AiPaintingService {
             if (Objects.isNull(imageBase64List) || imageBase64List.isEmpty()) {
                 throw new TaskException("task.generate.image.is.error", null);
             }
+            // 去除txt2ImgImageVoBase64List中ControlNet数据
+            int controlNetUnitsCount = args.size();
+            // imageBase64List的后controlNetUnitsCount个元素为ControlNet数据
+            int startIndex = Math.max(0, imageBase64List.size() - controlNetUnitsCount);
+            int endIndex = imageBase64List.size();
+            List<String> controlNetImageBase64List = new ArrayList<>(imageBase64List.subList(startIndex, endIndex));
+            imageBase64List.subList(startIndex, endIndex).clear();
             List<Txt2ImgImageVo> txt2ImgImageVoBase64List = getTxt2ImgImageVos(params, imageBase64List);
             Txt2ImgTaskVo txt2ImgTaskVo = getTxt2ImgTaskVo(taskId, params, uid, txt2ImgImageVoBase64List);
             // 完成任务
             taskSuccess(taskId, txt2ImgTaskVo);
             // 保存任务信息
-            saveTask(taskId, uid, txt2ImgImageVoBase64List, parameters);
+            List<Txt2ImgImageVo> txt2ImgImageVoControlNetImageList = getTxt2ImgImageVos(params, controlNetImageBase64List);
+            List<Txt2ImgImageVo> txt2ImgImageVoControlNetInputImageList = getTxt2ImgImageVos(params, inputImageList);
+            saveTask(taskId, uid, controlNetArgs,
+                    txt2ImgImageVoBase64List,
+                    txt2ImgImageVoControlNetImageList,
+                    txt2ImgImageVoControlNetInputImageList,
+                    parameters);
         }, taskId, uid);
         
-        // new Thread(() -> {
-        //     try {
-        //         submit.get();
-        //     } catch (CancellationException e) {
-        //         log.error("任务{}被取消", taskId);
-        //     } catch (InterruptedException e) {
-        //         log.error("任务{}被中断", taskId);
-        //         TaskProgressVo taskProgressVo = new TaskProgressVo();
-        //         taskProgressVo.setTaskId(taskId);
-        //         taskProgressVo.setFailed(true);
-        //         taskProgressVo.setFailureCause(MessageUtils.message("task.is.interrupt"));
-        //         finishTaskMap.put(taskId, taskProgressVo);
-        //     } catch (Exception e) {
-        //         log.error("获取任务{}执行结果异常,原因:{}", taskId, e.getMessage());
-        //         TaskProgressVo taskProgressVo = new TaskProgressVo();
-        //         taskProgressVo.setTaskId(taskId);
-        //         taskProgressVo.setFailed(true);
-        //         taskProgressVo.setFailureCause(MessageUtils.message("task.generate.image.is.error"));
-        //         finishTaskMap.put(taskId, taskProgressVo);
-        //     }
-        // }).start();
+        CompletableFuture.runAsync(() -> {
+            try {
+                submit.get();
+            } catch (CancellationException e) {
+                log.error("任务{}被取消", taskId);
+            } catch (InterruptedException e) {
+                log.error("任务{}被中断", taskId);
+                TaskProgressVo taskProgressVo = new TaskProgressVo();
+                taskProgressVo.setTaskId(taskId);
+                taskProgressVo.setFailed(true);
+                taskProgressVo.setFailureCause(MessageUtils.message("task.is.interrupt"));
+                finishTaskMap.put(taskId, taskProgressVo);
+            } catch (Exception e) {
+                log.error("获取任务{}执行结果异常,原因:{}", taskId, e.getMessage());
+                e.printStackTrace();
+                TaskProgressVo taskProgressVo = new TaskProgressVo();
+                taskProgressVo.setTaskId(taskId);
+                taskProgressVo.setFailed(true);
+                taskProgressVo.setFailureCause(MessageUtils.message("task.generate.image.is.error"));
+                finishTaskMap.put(taskId, taskProgressVo);
+            }
+        }, threadPoolExecutor);
         
         return taskId;
     }
+    
     
     /**
      * 获取任务的进度
@@ -333,6 +358,24 @@ public class AiPaintingServiceImpl implements AiPaintingService {
         return txt2ImgTaskVo;
     }
     
+    private static ControlNetArgs getControlNetArgs(Txt2ImgParamsVo.ControlNetArgs arg) {
+        ControlNetArgs controlNetArg = new ControlNetArgs();
+        controlNetArg.setEnabled(arg.getEnabled());
+        controlNetArg.setModule(arg.getModuleOriginal());
+        controlNetArg.setModel(arg.getModel());
+        controlNetArg.setWeight(arg.getWeight());
+        controlNetArg.setResizeMode(arg.getResizeMode());
+        controlNetArg.setLowvram(arg.getLowvram());
+        controlNetArg.setProcessorRes(arg.getProcessorRes());
+        controlNetArg.setThresholdA(arg.getThresholdA());
+        controlNetArg.setThresholdB(arg.getThresholdB());
+        controlNetArg.setGuidanceStart(arg.getGuidanceStart());
+        controlNetArg.setGuidanceEnd(arg.getGuidanceEnd());
+        controlNetArg.setControlMode(arg.getControlMode());
+        controlNetArg.setPixelPerfect(arg.getPixelPerfect());
+        return controlNetArg;
+    }
+    
     /**
      * 将任务放入完成任务队列
      *
@@ -392,15 +435,39 @@ public class AiPaintingServiceImpl implements AiPaintingService {
     /**
      * 保存任务信息
      *
-     * @param taskId                   任务ID
-     * @param uid                      用户ID
-     * @param txt2ImgImageVoBase64List txt2img图像信息base64列表
-     * @param parameters               参数
+     * @param taskId                                 任务ID
+     * @param uid                                    用户ID
+     * @param args                                   controlnet参数
+     * @param txt2ImgImageVoBase64List               txt2img图像信息base64列表
+     * @param txt2ImgImageVoControlNetImageList      controlnet预处理图像信息base64列表
+     * @param txt2ImgImageVoControlNetInputImageList controlnet输入图像信息base64列表
+     * @param parameters                             参数
      */
-    private void saveTask(String taskId, Long uid, List<Txt2ImgImageVo> txt2ImgImageVoBase64List, Txt2ImgParams parameters) {
+    private void saveTask(String taskId, Long uid,
+                          List<ControlNetArgs> args,
+                          List<Txt2ImgImageVo> txt2ImgImageVoBase64List,
+                          List<Txt2ImgImageVo> txt2ImgImageVoControlNetImageList,
+                          List<Txt2ImgImageVo> txt2ImgImageVoControlNetInputImageList,
+                          Txt2ImgParams parameters) {
         // 保存图片文件/OSS
-        CompletableFuture<List<Txt2ImgImage>> saveImageFiles = CompletableFuture.supplyAsync(() ->
-                fileService.saveImagesToImagesServer(txt2ImgImageVoBase64List, taskId), threadPoolExecutor);
+        CompletableFuture<List<Txt2ImgImage>> saveImageFiles = CompletableFuture.supplyAsync(() -> {
+            List<Txt2ImgImage> txt2ImgImages = fileService.saveImages(txt2ImgImageVoBase64List, taskId);
+            List<String> txt2ImgControlNetImages = fileService.saveImages(txt2ImgImageVoControlNetImageList);
+            List<String> txt2ImgControlNetInputImages = fileService.saveImages(txt2ImgImageVoControlNetInputImageList);
+            for (int i = 0; i < args.size(); i++) {
+                ControlNetArgs.ControlNetImage controlNetImage = new ControlNetArgs.ControlNetImage();
+                controlNetImage.setHeight(parameters.getHeight());
+                controlNetImage.setWidth(parameters.getWidth());
+                controlNetImage.setImageUrl(txt2ImgControlNetImages.get(i));
+                args.get(i).setImage(controlNetImage);
+                ControlNetArgs.ControlNetImage controlNetInputImage = new ControlNetArgs.ControlNetImage();
+                controlNetInputImage.setHeight(parameters.getHeight());
+                controlNetInputImage.setWidth(parameters.getWidth());
+                controlNetInputImage.setImageUrl(txt2ImgControlNetInputImages.get(i));
+                args.get(i).setInputImage(controlNetInputImage);
+            }
+            return txt2ImgImages;
+        }, threadPoolExecutor);
         
         saveImageFiles.whenComplete((txt2ImgImages, throwable) -> {
             if (Objects.nonNull(throwable)) {
@@ -414,6 +481,7 @@ public class AiPaintingServiceImpl implements AiPaintingService {
             Date now = DateUtils.now();
             txt2ImgTask.setCreateTime(now);
             parameters.setCreateTime(now);
+            parameters.setControlNetArgs(JSON.toJSONString(args));
             CompletableFuture.runAsync(() ->
                     txt2ImgTaskService.saveTxt2ImgTask(parameters, txt2ImgImages, txt2ImgTask), threadPoolExecutor);
         });

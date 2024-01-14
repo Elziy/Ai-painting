@@ -19,6 +19,11 @@ public class Txt2ImgTaskController {
     @Resource
     private UserLikeService userLikeService;
     
+    @GetMapping("/{tid}")
+    public R<Txt2ImgTaskVo> txt2Img(@PathVariable String tid) {
+        return R.ok(txt2ImgTaskService.getUserWorkByTid(tid));
+    }
+    
     @GetMapping("/all/{uid}")
     public R<List<Txt2ImgTaskVo>> txt2Img(UserWorkParamsVo params, @PathVariable Long uid) {
         return R.ok(txt2ImgTaskService.getTxt2ImgTaskVoByUid(uid, params));

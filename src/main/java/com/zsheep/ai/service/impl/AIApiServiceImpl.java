@@ -1,6 +1,7 @@
 package com.zsheep.ai.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.zsheep.ai.common.constants.ApiConstant;
 import com.zsheep.ai.common.constants.HttpMethods;
 import com.zsheep.ai.common.constants.HttpStatus;

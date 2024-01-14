@@ -4,11 +4,13 @@ import com.zsheep.ai.common.constants.HttpStatus;
 import com.zsheep.ai.common.core.domain.R;
 import com.zsheep.ai.common.core.domain.model.ImageEntity;
 import com.zsheep.ai.config.api.ApiProperties;
+import com.zsheep.ai.config.api.UploadProperties;
 import com.zsheep.ai.domain.entity.Txt2ImgImage;
 import com.zsheep.ai.domain.model.Txt2ImgImageVo;
 import com.zsheep.ai.service.UploadApiService;
 import com.zsheep.ai.utils.Base64Util;
 import com.zsheep.ai.utils.DateUtils;
+import com.zsheep.ai.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,9 @@ public class FileService {
     private UploadApiService uploadApiService;
     
     @Resource
+    private UploadProperties uploadProperties;
+    
+    @Resource
     private ThreadPoolExecutor threadPoolExecutor;
     
     public final SimpleDateFormat sdf;
@@ -40,14 +45,36 @@ public class FileService {
         sdf = new SimpleDateFormat(apiProperties.getFileNameDateFormat());
     }
     
+    public List<String> saveImages(List<Txt2ImgImageVo> images) {
+        List<String> result = new ArrayList<>();
+        Date date = DateUtils.now();
+        String format = sdf.format(date);
+        for (Txt2ImgImageVo image : images) {
+            CompletableFuture<String> imageUrl = getImageUrlFuture(image, format);
+            result.add(imageUrl.join());
+        }
+        return result;
+    }
+    
     public List<Txt2ImgImage> saveImages(List<Txt2ImgImageVo> images, String taskId) {
         List<Txt2ImgImage> result = new ArrayList<>();
         Date date = DateUtils.now();
         String format = sdf.format(date);
         for (Txt2ImgImageVo image : images) {
             Txt2ImgImage txt2ImgImage = getTxt2ImgImage(taskId, image);
-            
-            CompletableFuture<String> imageUrl = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<String> imageUrl = getImageUrlFuture(image, format);
+            txt2ImgImage.setImageUrl(imageUrl.join());
+            result.add(txt2ImgImage);
+        }
+        return result;
+    }
+    
+    private CompletableFuture<String> getImageUrlFuture(Txt2ImgImageVo image, String format) {
+        boolean notSaveToImagesServer = StringUtils.isEmpty(uploadProperties.getUploadHost())
+                || StringUtils.isEmpty(uploadProperties.getImageHost());
+        if (notSaveToImagesServer) {
+            log.info("图片保存到本地");
+            return CompletableFuture.supplyAsync(() -> {
                 String fileName = format + image.getImageId() + "." + apiProperties.getFileType();
                 String imgFilePath = apiProperties.getFilePath() + fileName;
                 try {
@@ -57,20 +84,9 @@ public class FileService {
                 }
                 return "/" + fileName;
             }, threadPoolExecutor);
-            txt2ImgImage.setImageUrl(imageUrl.join());
-            result.add(txt2ImgImage);
-        }
-        return result;
-    }
-    
-    public List<Txt2ImgImage> saveImagesToImagesServer(List<Txt2ImgImageVo> images, String taskId) {
-        List<Txt2ImgImage> result = new ArrayList<>();
-        Date date = DateUtils.now();
-        String format = sdf.format(date);
-        for (Txt2ImgImageVo image : images) {
-            Txt2ImgImage txt2ImgImage = getTxt2ImgImage(taskId, image);
-            
-            CompletableFuture<String> imageUrl = CompletableFuture.supplyAsync(() -> {
+        } else {
+            log.info("图片保存到图片服务器");
+            return CompletableFuture.supplyAsync(() -> {
                 String fileName = format + image.getImageId() + "." + apiProperties.getFileType();
                 String imgFilePath = apiProperties.getFilePath() + fileName;
                 try {
@@ -85,10 +101,7 @@ public class FileService {
                 }
                 return "/" + fileName;
             }, threadPoolExecutor);
-            txt2ImgImage.setImageUrl(imageUrl.join());
-            result.add(txt2ImgImage);
         }
-        return result;
     }
     
     private static Txt2ImgImage getTxt2ImgImage(String taskId, Txt2ImgImageVo image) {

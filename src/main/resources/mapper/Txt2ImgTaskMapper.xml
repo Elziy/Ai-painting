@@ -58,6 +58,7 @@
         <result property="samplerIndex" column="sampler_index" jdbcType="VARCHAR"/>
         <result property="dimensionId" column="dimension_id" jdbcType="INTEGER"/>
         <result property="model" column="sd_model_checkpoint" jdbcType="VARCHAR"/>
+        <result property="controlNetArgs" column="control_net_args" jdbcType="VARCHAR"/>
         <association property="overrideSettings" javaType="com.zsheep.ai.domain.model.api.OverrideSettings">
             <result property="etaNoiseSeedDelta" column="eta_noise_seed_delta" jdbcType="BIGINT"/>
             <result property="clipStopAtLastLayers" column="CLIP_stop_at_last_layers" jdbcType="BIGINT"/>
@@ -103,6 +104,7 @@
         p.sd_model_checkpoint,
         p.eta_noise_seed_delta,
         p.CLIP_stop_at_last_layers,
+        p.control_net_args,
         i.image_id,
         i.width as image_width,
         i.height as image_height,
@@ -215,6 +217,7 @@
                p.sd_model_checkpoint,
                p.eta_noise_seed_delta,
                p.CLIP_stop_at_last_layers,
+               p.control_net_args,
                u.username,
                u.avatar,
                i.image_id,

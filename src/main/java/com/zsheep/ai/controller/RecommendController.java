@@ -27,11 +27,6 @@ public class RecommendController {
         return R.ok(txt2ImgTaskService.getRecommendImages(params));
     }
     
-    @GetMapping("/txt2img/{tid}")
-    public R<Txt2ImgTaskVo> txt2Img(@PathVariable String tid) {
-        return R.ok(txt2ImgTaskService.getUserWorkByTid(tid));
-    }
-    
     @GetMapping("/random")
     public R<?> getRandomImages(Double width, Double height, Double ratio) {
         return R.ok(txt2ImgImageService.getRandomImages(width, height, ratio));

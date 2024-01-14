@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "ai.upload")
 public class UploadProperties {
     
-    private String uploadHost = "http://127.0.0.1";
+    private String uploadHost = "";
     
-    private String imageHost = "http://127.0.0.1";
+    private String imageHost = "";
     
 }
