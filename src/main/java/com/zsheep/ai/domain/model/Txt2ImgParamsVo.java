@@ -173,13 +173,14 @@ public class Txt2ImgParamsVo {
     @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class ControlNetArgs {
         private Boolean enabled = true;
+        private String filter;
         private String module;
         private String moduleOriginal;
         private String model;
         private Double weight = 1.0;
         private String image;
         private String inputImage;
-        private Integer resizeMode;
+        private Integer resizeMode = 1;
         private Boolean lowvram = false;
         private Integer processorRes = 512;
         private Integer thresholdA = -1;

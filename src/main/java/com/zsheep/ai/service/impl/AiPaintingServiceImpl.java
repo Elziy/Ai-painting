@@ -363,6 +363,7 @@ public class AiPaintingServiceImpl implements AiPaintingService {
         controlNetArg.setEnabled(arg.getEnabled());
         controlNetArg.setModule(arg.getModuleOriginal());
         controlNetArg.setModel(arg.getModel());
+        controlNetArg.setFilter(arg.getFilter());
         controlNetArg.setWeight(arg.getWeight());
         controlNetArg.setResizeMode(arg.getResizeMode());
         controlNetArg.setLowvram(arg.getLowvram());
