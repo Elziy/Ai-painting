@@ -88,7 +88,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 对于登录接口 anonymous只允许匿名访问 permitAll都能访问
                 .antMatchers("/auth/login", "/auth/register").permitAll()
                 .antMatchers("/user/*", "/user/*/likes", "/user/*/works").permitAll()
-                .antMatchers("/works/recommend/**", "/works/txt2img/all/**").permitAll()
+                .antMatchers("/works/recommend/**", "/works/txt2img/**").permitAll()
                 .antMatchers("/sd/stable-diffusion-models").permitAll()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();

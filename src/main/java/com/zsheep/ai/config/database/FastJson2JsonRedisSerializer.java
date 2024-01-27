@@ -29,7 +29,15 @@ public class FastJson2JsonRedisSerializer<T> implements RedisSerializer<T> {
         if (t == null) {
             return new byte[0];
         }
-        return JSON.toJSONString(t, JSONWriter.Feature.WriteClassName).getBytes(DEFAULT_CHARSET);
+        return JSON.toJSONString(t, JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.WriteNulls,
+                // 在大范围超过JavaScript支持的整数，输出为字符串格式
+                JSONWriter.Feature.BrowserCompatible,
+                //  List字段如果为null,输出为[],而非null
+                JSONWriter.Feature.WriteNullListAsEmpty,
+                // 将Boolean类型字段的空值序列化输出为false
+                JSONWriter.Feature.WriteNullBooleanAsFalse,
+                JSONWriter.Feature.WriteLongAsString).getBytes(DEFAULT_CHARSET);
     }
     
     @Override

@@ -45,7 +45,8 @@ public class WebConfig implements WebMvcConfigurer {
                 //  List字段如果为null,输出为[],而非null
                 JSONWriter.Feature.WriteNullListAsEmpty,
                 // 将Boolean类型字段的空值序列化输出为false
-                JSONWriter.Feature.WriteNullBooleanAsFalse
+                JSONWriter.Feature.WriteNullBooleanAsFalse,
+                JSONWriter.Feature.WriteLongAsString
         );
         
         fastJsonConfig.setReaderFeatures(
