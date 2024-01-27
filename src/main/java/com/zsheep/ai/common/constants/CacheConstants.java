@@ -47,4 +47,6 @@ public class CacheConstants {
     public static final String IMAGE_TID = "image_tid:";
     
     public static final String STABLE_DIFFUSION_MODELS = "stable_diffusion_models";
+    
+    public static final String ControlNetTypes = "control_net_types";
 }
