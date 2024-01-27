@@ -15,4 +15,6 @@ public class ApiConstant {
     public static final String CONTROLNET_PREPROCESS = "/controlnet/preprocess";
     
     public static final String CONTROLNET_TYPE = "/controlnet/control_types";
+    
+    public static final String A_DETAILER_MODELS = "/adetailer/v1/ad_model";
 }

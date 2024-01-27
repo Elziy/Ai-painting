@@ -25,7 +25,7 @@ public class ControlNetServiceImpl implements ControlNetService {
     }
     
     @Override
-    @CacheEvict(value = ControlNetTypes, allEntries = true)
+    @CacheEvict(value = ControlNetTypes)
     public String getControlNetType() {
         return aiApiService.getControlNetTypeByApi();
     }

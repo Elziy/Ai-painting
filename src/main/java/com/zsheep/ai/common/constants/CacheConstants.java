@@ -49,4 +49,6 @@ public class CacheConstants {
     public static final String STABLE_DIFFUSION_MODELS = "stable_diffusion_models";
     
     public static final String ControlNetTypes = "control_net_types";
+    
+    public static final String AfterDetailerModels = "after_detailer_models";
 }

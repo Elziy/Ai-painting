@@ -187,6 +187,29 @@ public class AIApiServiceImpl implements AIApiService {
         }
     }
     
+    @Override
+    public String getADetailerModels() {
+        HttpResponse response;
+        try {
+            response = HttpUtil.doGet(apiProperties.getHost(), ApiConstant.A_DETAILER_MODELS, HttpMethods.GET, getHeaders(), null);
+        } catch (Exception e) {
+            throw new ServiceException("调用获取Adetailer模型api异常");
+        }
+        if (Objects.nonNull(response) && response.getStatusLine().getStatusCode() == HttpStatus.SUCCESS) {
+            try {
+                return EntityUtils.toString(response.getEntity());
+            } catch (IOException e) {
+                throw new ServiceException("解析获取Adetailer模型api返回结果异常");
+            }
+        } else {
+            try {
+                log.error("调用获取Adetailer模型api异常{}", EntityUtils.toString(response.getEntity()));
+            } catch (IOException ignored) {
+            }
+            throw new ServiceException("调用获取Adetailer模型api异常");
+        }
+    }
+    
     private Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");

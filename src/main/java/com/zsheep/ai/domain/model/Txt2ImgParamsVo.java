@@ -2,6 +2,7 @@ package com.zsheep.ai.domain.model;
 
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.zsheep.ai.common.core.domain.model.Dimension;
 import com.zsheep.ai.common.core.valid.DecimalMultiple;
 import com.zsheep.ai.domain.model.api.OverrideSettings;
@@ -152,6 +153,10 @@ public class Txt2ImgParamsVo {
     
     private String controlNetArgs;
     
+    private OtherExtension otherExtension;
+    
+    private String otherExtensionArgs;
+    
     @SuppressWarnings("unused")
     public void setDimensionId(int dimensionId) {
         this.dimensionId = dimensionId;
@@ -167,6 +172,18 @@ public class Txt2ImgParamsVo {
     @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class ControlNet {
         List<ControlNetArgs> args;
+    }
+    
+    @Data
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    public static class OtherExtension {
+        private AfterDetailer afterDetailer;
+    }
+    
+    @Data
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    public static class AfterDetailer {
+        List<AfterDetailerArgs> args;
     }
     
     @Data
@@ -194,5 +211,11 @@ public class Txt2ImgParamsVo {
             this.moduleOriginal = module;
             this.module = "none";
         }
+    }
+    
+    @Data
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    public static class AfterDetailerArgs {
+        private String adModel;
     }
 }

@@ -108,6 +108,7 @@ public class AiPaintingServiceImpl implements AiPaintingService {
             Txt2ImgParams parameters = apiImgageResponse.getParameters();
             parameters.setPid(taskId);
             parameters.setDimensionId(params.getDimension().getId());
+            parameters.setOtherExtension(JSON.toJSONString(params.getOtherExtension()));
             parameters.setInfo(apiImgageResponse.getInfo());
             parameters.setSdModelCheckpoint(parameters.getOverrideSettings().getSdModelCheckpoint());
             parameters.setClipStopAtLastLayers(parameters.getOverrideSettings().getClipStopAtLastLayers());
@@ -336,6 +337,11 @@ public class AiPaintingServiceImpl implements AiPaintingService {
         
         Map<String, Object> alwaysonScripts = params.getAlwaysonScripts();
         alwaysonScripts.put("controlnet", params.getControlNet());
+        Txt2ImgParamsVo.OtherExtension otherExtension = params.getOtherExtension();
+        Txt2ImgParamsVo.AfterDetailer afterDetailer = otherExtension.getAfterDetailer();
+        if (!afterDetailer.getArgs().isEmpty()) {
+            alwaysonScripts.put("ADetailer", afterDetailer);
+        }
         params.setControlNet(null);
     }
     

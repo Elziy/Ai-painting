@@ -116,6 +116,8 @@ public class Txt2ImgParams implements Serializable {
     
     private String controlNetArgs;
     
+    private String otherExtension;
+    
     /**
      * 创作信息
      */

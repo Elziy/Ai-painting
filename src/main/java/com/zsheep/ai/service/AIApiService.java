@@ -23,4 +23,6 @@ public interface AIApiService {
     ApiControlNetPreprocessResponse getControlNetPreprocessByApi(ControlNetPreprocessParamsVo params);
     
     String getControlNetTypeByApi();
+    
+    String getADetailerModels();
 }
