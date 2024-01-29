@@ -33,7 +33,7 @@ public class AuthController {
         } catch (ServiceException e) {
             return R.error(MessageUtils.error());
         } catch (Exception e) {
-            return R.error(HttpStatus.UNAUTHORIZED, e.getMessage());
+            return R.error(HttpStatus.UNAUTHORIZED, MessageUtils.error());
         }
         return R.ok(loginUser);
     }
