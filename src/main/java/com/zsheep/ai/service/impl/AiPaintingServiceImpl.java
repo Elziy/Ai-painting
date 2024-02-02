@@ -13,6 +13,7 @@ import com.zsheep.ai.common.exception.service.ServiceException;
 import com.zsheep.ai.common.exception.task.TaskException;
 import com.zsheep.ai.config.api.ApiProperties;
 import com.zsheep.ai.config.thread.MyFutureTask;
+import com.zsheep.ai.domain.entity.Model;
 import com.zsheep.ai.domain.entity.Txt2ImgImage;
 import com.zsheep.ai.domain.entity.Txt2ImgParams;
 import com.zsheep.ai.domain.entity.Txt2ImgTask;
@@ -23,7 +24,7 @@ import com.zsheep.ai.domain.model.api.ApiTaskProgress;
 import com.zsheep.ai.domain.model.api.OverrideSettings;
 import com.zsheep.ai.service.AIApiService;
 import com.zsheep.ai.service.AiPaintingService;
-import com.zsheep.ai.service.StableDiffusionModelService;
+import com.zsheep.ai.service.ModelService;
 import com.zsheep.ai.service.Txt2ImgTaskService;
 import com.zsheep.ai.utils.DateUtils;
 import com.zsheep.ai.utils.MessageUtils;
@@ -65,7 +66,7 @@ public class AiPaintingServiceImpl implements AiPaintingService {
     private Txt2ImgTaskService txt2ImgTaskService;
     
     @Resource
-    private StableDiffusionModelService stableDiffusionModelService;
+    private ModelService modelService;
     
     /**
      * 图片base64编码格式前缀
@@ -326,12 +327,11 @@ public class AiPaintingServiceImpl implements AiPaintingService {
                 params.setOverrideSettings(overrideSettings);
             }
             overrideSettings.setSdModelCheckpoint(null);
-            List<StableDiffusionModelVo> stableDiffusionModels = stableDiffusionModelService.getAllModelsFromRedis();
-            for (StableDiffusionModelVo model : stableDiffusionModels) {
-                if (model.getHash().equals(params.getModel())) {
-                    overrideSettings.setSdModelCheckpoint(model.getHash());
-                    break;
-                }
+            Model mdoel = modelService.getOneByHash(params.getModel());
+            if (Objects.isNull(mdoel)) {
+                throw new ServiceException("model.not.found", new String[]{params.getModel()});
+            } else {
+                overrideSettings.setSdModelCheckpoint(mdoel.getHash());
             }
         }
         

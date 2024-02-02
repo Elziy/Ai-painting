@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
 
-@Configuration
+// @Configuration
 public class StableDiffusionConfig {
     
     @Resource

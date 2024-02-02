@@ -47,6 +47,7 @@ public class AiPaintingController {
         try {
             return R.ok(aiPaintingService.txt2imgAsync(params), MessageUtils.message("task.submit.success"));
         } catch (Exception e) {
+            log.error(String.valueOf(e));
             return R.error(MessageUtils.message("task.submit.error"));
         }
     }
