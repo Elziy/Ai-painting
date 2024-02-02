@@ -1,8 +1,8 @@
 package com.zsheep.ai.domain.model;
 
 import com.alibaba.fastjson2.PropertyNamingStrategy;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.zsheep.ai.common.core.domain.model.Dimension;
 import com.zsheep.ai.common.core.valid.DecimalMultiple;
 import com.zsheep.ai.domain.model.api.OverrideSettings;
@@ -149,10 +149,12 @@ public class Txt2ImgParamsVo {
     
     private String model;
     
+    @JSONField(serialize = false)
     private ControlNet controlNet;
     
     private String controlNetArgs;
     
+    @JSONField(serialize = false)
     private OtherExtension otherExtension;
     
     private String otherExtensionArgs;

@@ -89,7 +89,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/login", "/auth/register").permitAll()
                 .antMatchers("/user/*", "/user/*/likes", "/user/*/works").permitAll()
                 .antMatchers("/works/recommend/**", "/works/txt2img/**").permitAll()
-                .antMatchers("/sd/stable-diffusion-models").permitAll()
+                .antMatchers("/sd/models/**", "/extension/after-detailer/models").permitAll()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated();
         http.logout().permitAll().logoutSuccessHandler(logoutSuccessHandler);
