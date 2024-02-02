@@ -72,23 +72,24 @@ public class FileService {
     private CompletableFuture<String> getImageUrlFuture(Txt2ImgImageVo image, String format) {
         boolean notSaveToImagesServer = StringUtils.isEmpty(uploadProperties.getUploadHost())
                 || StringUtils.isEmpty(uploadProperties.getImageHost());
+        String filePath = apiProperties.getFilePath() + "/images/";
         if (notSaveToImagesServer) {
             log.info("图片保存到本地");
             return CompletableFuture.supplyAsync(() -> {
                 String fileName = format + image.getImageId() + "." + apiProperties.getFileType();
-                String imgFilePath = apiProperties.getFilePath() + fileName;
+                String imgFilePath = filePath + fileName;
                 try {
                     Base64Util.generateImage(image.getImageUrl(), imgFilePath);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }
-                return "/" + fileName;
+                return "/images/" + fileName;
             }, threadPoolExecutor);
         } else {
             log.info("图片保存到图片服务器");
             return CompletableFuture.supplyAsync(() -> {
                 String fileName = format + image.getImageId() + "." + apiProperties.getFileType();
-                String imgFilePath = apiProperties.getFilePath() + fileName;
+                String imgFilePath = filePath + fileName;
                 try {
                     ImageEntity imageEntity = new ImageEntity(image.getImageUrl(), imgFilePath);
                     R<?> r = uploadApiService.uploadImage(imageEntity);
@@ -99,7 +100,7 @@ public class FileService {
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }
-                return "/" + fileName;
+                return "/images/" + fileName;
             }, threadPoolExecutor);
         }
     }
