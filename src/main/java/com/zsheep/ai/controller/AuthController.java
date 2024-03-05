@@ -31,7 +31,7 @@ public class AuthController {
         try {
             loginUser = loginService.login(loginBody.getEmail(), loginBody.getPassword(), loginBody.getCode(), loginBody.getUuid());
         } catch (ServiceException e) {
-            return R.error(MessageUtils.error());
+            return R.error(e.getMessage());
         } catch (Exception e) {
             return R.error(HttpStatus.UNAUTHORIZED, MessageUtils.error());
         }

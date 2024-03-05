@@ -78,13 +78,13 @@ public class LoginService {
             authentication = authenticationManager.authenticate(authenticationToken);
         } catch (Exception e) {
             if (e instanceof InternalAuthenticationServiceException) {
-                throw new RuntimeException(e.getMessage());
+                throw new ServiceException(e.getMessage());
             } else if (e instanceof BadCredentialsException) {
                 throw new UserPasswordNotMatchException();
             } else {
                 log.error("登录异常:{}", e.getMessage());
                 e.printStackTrace();
-                throw new ServiceException(e.getMessage());
+                throw new RuntimeException(e.getMessage());
             }
         } finally {
             AuthenticationContextHolder.clearContext();
